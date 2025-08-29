@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>江苏泰斯特回款率排行榜</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #4ade80;
+            --warning-color: #fbbf24;
+            --danger-color: #f87171;
+            --dark-color: #1f2937;
+            --light-color: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark-color);
+        }
+
+        .report-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--light-color);
+            border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .report-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .report-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .report-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .champion-card {
+            background: white;
+            margin: 30px;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .champion-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--success-color), var(--warning-color), var(--danger-color));
+        }
+
+        .champion-icon {
+            font-size: 3rem;
+            color: var(--success-color);
+            margin-bottom: 20px;
+        }
+
+        .champion-name {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 10px;
+        }
+
+        .champion-rate {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--success-color);
+            margin-bottom: 15px;
+        }
+
+        .champion-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .detail-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .ranking-section {
+            padding: 30px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .ranking-table th,
+        .ranking-table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .ranking-table th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .ranking-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-excellent {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .badge-good {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .badge-poor {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .rank-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .rank-1 {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .rank-2-3 {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .rank-4-10 {
+            background: var(--info-color);
+            color: white;
+        }
+
+        .insights {
+            margin: 30px;
+            padding: 30px;
+            background: #f8fafc;
+            border-radius: 16px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .insights-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .insight-item {
+            margin: 10px 0;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .insight-item:last-child {
+            border-bottom: none;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .champion-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .report-header {
+                padding: 30px 20px;
+            }
+            
+            .report-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <div class="report-header">
+            <h1 class="report-title">🏆 回款率排行榜</h1>
+            <p class="report-subtitle">江苏泰斯特生态环保研究院有限公司 | 2025年6-8月</p>
+        </div>
+
+        <div class="champion-card">
+            <div class="champion-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+            <h2 class="champion-title">回款率冠军</h2>
+            <div class="champion-name">代玉洁</div>
+            <div class="champion-rate">100.00%</div>
+            <div class="champion-details">
+                <div class="detail-item">
+                    <div class="detail-label">合同总金额</div>
+                    <div class="detail-value">¥14,500</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">已回款金额</div>
+                    <div class="detail-value">¥14,500</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">合同数量</div>
+                    <div class="detail-value">4笔</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ranking-section">
+            <h3 class="section-title">
+                <i class="fas fa-trophy"></i>
+                完整排行榜
+            </h3>
+            <table class="ranking-table">
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>业务员</th>
+                        <th>合同总金额</th>
+                        <th>已回款金额</th>
+                        <th>回款率</th>
+                        <th>合同数量</th>
+                        <th>评级</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="rank-number rank-1">1</span></td>
+                        <td><strong>代玉洁</strong></td>
+                        <td>¥14,500</td>
+                        <td>¥14,500</td>
+                        <td><span class="badge badge-excellent">100.00%</span></td>
+                        <td>4</td>
+                        <td>优秀</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-number rank-1">1</span></td>
+                        <td><strong>陈超炜</strong></td>
+                        <td>¥3,000</td>
+                        <td>¥3,000</td>
+                        <td><span class="badge badge-excellent">100.00%</span></td>
+                        <td>1</td>
+                        <td>优秀</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-number rank-1">1</span></td>
+                        <td><strong>陈慧</strong></td>
+                        <td>¥8,500</td>
+                        <td>¥8,500</td>
+                        <td><span class="badge badge-excellent">100.00%</span></td>
+                        <td>7</td>
+                        <td>优秀</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-number rank-2-3">4</span></td>
+                        <td>卓恒</td>
+                        <td>¥5,160</td>
+                        <td>¥4,296</td>
+                        <td><span class="badge badge-good">83.26%</span></td>
+                        <td>2</td>
+                        <td>良好</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-number rank-2-3">5</span></td>
+                        <td>李晓宇</td>
+                        <td>¥59,560</td>
+                        <td>¥48,500</td>
+                        <td><span class="badge badge-good">81.43%</span></td>
+                        <td>4</td>
+                        <td>良好</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-number">6</span></td>
+                        <td>于文武</td>
+                        <td>¥4,600</td>
+                        <td>¥3,200</td>
+                        <td><span class="badge badge-good">69.57%</span></td>
+                        <td>2</td>
+                        <td>良好</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-number">7</span></td>
+                        <td>苏园英</td>
+                        <td>¥47,877</td>
+                        <td>¥30,020</td>
+                        <td><span class="badge badge-good">62.70%</span></td>
+                        <td>33</td>
+                        <td>良好</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-number">8</span></td>
+                        <td>乔昌省</td>
+                        <td>¥700</td>
+                        <td>¥400</td>
+                        <td><span class="badge badge-good">57.14%</span></td>
+                        <td>2</td>
+                        <td>一般</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-number">9</span></td>
+                        <td>卓勇</td>
+                        <td>¥7,000</td>
+                        <td>¥3,500</td>
+                        <td><span class="badge badge-good">50.00%</span></td>
+                        <td>3</td>
+                        <td>一般</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-number">10</span></td>
+                        <td>赵则林</td>
+                        <td>¥171,516</td>
+                        <td>¥85,715</td>
+                        <td><span class="badge badge-good">49.98%</span></td>
+                        <td>39</td>
+                        <td>一般</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="insights">
+            <h4 class="insights-title">
+                <i class="fas fa-lightbulb"></i>
+                关键洞察
+            </h4>
+            <div class="insight-item">
+                <strong>3位业务员回款率100%：</strong>代玉洁、陈超炜、陈慧表现优异，建议总结成功经验
+            </div>
+            <div class="insight-item">
+                <strong>大额合同需注意：</strong>葛茂峰合同金额超100万但回款率仅25.74%，需重点跟进
+            </div>
+            <div class="insight-item">
+                <strong>提升空间：</strong>袁伟彬回款率仅2.42%，急需制定专项回款计划
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 添加数值动画效果
+        document.addEventListener('DOMContentLoaded', function() {
+            const counters = document.querySelectorAll('.detail-value');
+            counters.forEach(counter => {
+                const value = parseInt(counter.textContent.replace(/[^0-9]/g, ''));
+                let current = 0;
+                const step = value / 50;
+                const timer = setInterval(() => {
+                    current += step;
+                    if (current >= value) {
+                        current = value;
+                        clearInterval(timer);
+                    }
+                    counter.textContent = '¥' + Math.floor(current).toLocaleString();
+                }, 20);
+            });
+        });
+    </script>
+</body>
+</html>
