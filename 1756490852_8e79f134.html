@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>江苏泰斯特业务员绩效对比报告</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #f093fb;
+            --success-color: #4ade80;
+            --warning-color: #fbbf24;
+            --danger-color: #f87171;
+            --info-color: #60a5fa;
+            --dark-color: #1f2937;
+            --light-color: #f8fafc;
+            --border-color: #e2e8f0;
+            --shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            --gradient-accent: linear-gradient(135deg, var(--accent-color) 0%, var(--primary-color) 100%);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        .report-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--light-color);
+            border-radius: 20px;
+            box-shadow: var(--shadow-large);
+            margin-top: 20px;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .report-header {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--gradient-primary);
+            border-radius: 16px;
+            color: white;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .report-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+        }
+        
+        .report-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .report-meta {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .kpi-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-large);
+        }
+        
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+        
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        
+        .kpi-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .kpi-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+        
+        .kpi-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+        }
+        
+        .kpi-change {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .change-positive {
+            color: var(--success-color);
+        }
+        
+        .change-negative {
+            color: var(--danger-color);
+        }
+        
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid var(--border-color);
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+            background: #fafbfc;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .data-table th {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .data-table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+        
+        .data-table tr:hover {
+            background: #f8fafc;
+        }
+        
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .insight-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+        
+        .insight-card:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .insight-title {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .insight-content {
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #64748b;
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 40px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .report-container {
+                margin: 10px;
+                padding: 15px;
+                border-radius: 12px;
+            }
+            
+            .report-title {
+                font-size: 1.8rem;
+            }
+            
+            .report-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container {
+                height: 300px;
+                padding: 15px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .animate-slide-in {
+            animation: slideInLeft 0.6s ease-out;
+        }
+        
+        /* 数值动画 */
+        .counter {
+            display: inline-block;
+        }
+        
+        /* 加载状态 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <!-- 报告头部 -->
+        <header class="report-header">
+            <h1 class="report-title">江苏泰斯特业务员绩效对比报告</h1>
+            <div class="report-meta">
+                <div class="meta-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>2025年8月30日</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-clock"></i>
+                    <span>2025年1月-8月</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-building"></i>
+                    <span>江苏泰斯特生态环保研究院有限公司</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- KPI指标卡片 -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-title">总合同金额</div>
+                    <div class="kpi-icon" style="background: var(--gradient-primary);">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">¥1,842万</div>
+                <div class="kpi-change change-positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>覆盖37位业务员</span>
+                </div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-title">总回款金额</div>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #4ade80, #22c55e);">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">¥511万</div>
+                <div class="kpi-change change-positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>整体回款率27.7%</span>
+                </div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-title">冠军业务员</div>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">刘松</div>
+                <div class="kpi-change change-positive">
+                    <i class="fas fa-star"></i>
+                    <span>345万合同金额</span>
+                </div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-title">最佳回款率</div>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #f87171, #ef4444);">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">陈慧</div>
+                <div class="kpi-change change-positive">
+                    <i class="fas fa-check-circle"></i>
+                    <span>100%回款率</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 业务员排行榜 -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h2 class="section-title">业务员绩效排行榜</h2>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>业务员</th>
+                        <th>合同数量</th>
+                        <th>总合同金额</th>
+                        <th>总回款金额</th>
+                        <th>平均合同金额</th>
+                        <th>回款率</th>
+                        <th>绩效评级</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: linear-gradient(90deg, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0.05) 100%);">
+                        <td>🥇1</td>
+                        <td><strong>刘松</strong></td>
+                        <td>238</td>
+                        <td>¥3,452,862</td>
+                        <td>¥776,510</td>
+                        <td>¥14,508</td>
+                        <td style="color: #4ade80;">22.49%</td>
+                        <td><span style="background: gold; padding: 4px 8px; border-radius: 20px; font-size: 0.8em;">🏆冠军</span></td>
+                    </tr>
+                    <tr style="background: linear-gradient(90deg, rgba(192,192,192,0.1) 0%, rgba(192,192,192,0.05) 100%);">
+                        <td>🥈2</td>
+                        <td><strong>袁伟彬</strong></td>
+                        <td>244</td>
+                        <td>¥2,589,289</td>
+                        <td>¥423,022</td>
+                        <td>¥10,612</td>
+                        <td style="color: #f87171;">16.34%</td>
+                        <td><span style="background: #c0c0c0; color: white; padding: 4px 8px; border-radius: 20px; font-size: 0.8em;">🥈亚军</span></td>
+                    </tr>
+                    <tr style="background: linear-gradient(90deg, rgba(205,127,50,0.1) 0%, rgba(205,127,50,0.05) 100%);">
+                        <td>🥉3</td>
+                        <td><strong>葛茂峰</strong></td>
+                        <td>105</td>
+                        <td>¥1,591,889</td>
+                        <td>¥501,610</td>
+                        <td>¥15,161</td>
+                        <td style="color: #4ade80;">31.51%</td>
+                        <td><span style="background: #cd7f32; color: white; padding: 4px 8px; border-radius: 20px; font-size: 0.8em;">🥉季军</span></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>周陆成</td>
+                        <td>40</td>
+                        <td>¥1,453,327</td>
+                        <td>¥302,941</td>
+                        <td>¥36,333</td>
+                        <td style="color: #fbbf24;">20.84%</td>
+                        <td><span style="background: #60a5fa; color: white; padding: 4px 8px; border-radius: 20px; font-size: 0.8em;">🔥高价值</span></td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>沈力</td>
+                        <td>131</td>
+                        <td>¥1,162,574</td>
+                        <td>¥584,103</td>
+                        <td>¥8,875</td>
+                        <td style="color: #4ade80;">50.24%</td>
+                        <td><span style="background: #4ade80; color: white; padding: 4px 8px; border-radius: 20px; font-size: 0.8em;">💰回款王</span></td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>卞军</td>
+                        <td>71</td>
+                        <td>¥1,022,820</td>
+                        <td>¥262,601</td>
+                        <td>¥14,406</td>
+                        <td style="color: #fbbf24;">25.67%</td>
+                        <td><span style="background: #fbbf24; color: white; padding: 4px 8px; border-radius: 20px; font-size: 0.8em;">📈稳健</span></td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>陈旭</td>
+                        <td>30</td>
+                        <td>¥1,022,400</td>
+                        <td>¥344,827</td>
+                        <td>¥34,080</td>
+                        <td style="color: #4ade80;">33.73%</td>
+                        <td><span style="background: #4ade80; color: white; padding: 4px 8px; border-radius: 20px; font-size: 0.8em;">💎优质</span></td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>申梦园</td>
+                        <td>146</td>
+                        <td>¥917,246</td>
+                        <td>¥370,164</td>
+                        <td>¥6,283</td>
+                        <td style="color: #4ade80;">40.36%</td>
+                        <td><span style="background: #4ade80; color: white; padding: 4px 8px; border-radius: 20px; font-size: 0.8em;">🎯精准</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 月度趋势分析 -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h2 class="section-title">TOP5业务员月度业绩趋势</h2>
+            </div>
+            <div class="chart-container">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </section>
+
+        <!-- 回款率分析 -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <h2 class="section-title">回款率分析</h2>
+            </div>
+            <div class="chart-container">
+                <canvas id="recoveryChart"></canvas>
+            </div>
+        </section>
+
+        <!-- 分析洞察 -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <h2 class="section-title">分析洞察与建议</h2>
+            </div>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-title">
+                        <i class="fas fa-crown" style="color: gold;"></i>
+                        业绩冠军分析
+                    </div>
+                    <div class="insight-content">
+                        刘松以345万合同金额遥遥领先，但回款率仅22.49%，建议加强回款管理。其238份合同数量最多，体现了强大的业务拓展能力。
+                    </div>
+                </div>
+                
+                <div class="insight-card">
+                    <div class="insight-title">
+                        <i class="fas fa-money-bill-wave" style="color: #4ade80;"></i>
+                        回款表现优异
+                    </div>
+                    <div class="insight-content">
+                        陈慧、苏园英、于文武等人回款率超过70%，其中陈慧达100%。这些业务员虽然合同金额不大，但回款质量极高，值得学习。
+                    </div>
+                </div>
+                
+                <div class="insight-card">
+                    <div class="insight-title">
+                        <i class="fas fa-chart-line" style="color: #60a5fa;"></i>
+                        高价值客户开发
+                    </div>
+                    <div class="insight-content">
+                        周陆成平均合同金额36,333元为最高，说明其专注于高价值客户。建议推广其客户开发策略，提升整体客单价。
+                    </div>
+                </div>
+                
+                <div class="insight-card">
+                    <div class="insight-title">
+                        <i class="fas fa-exclamation-triangle" style="color: #f87171;"></i>
+                        回款风险警示
+                    </div>
+                    <div class="insight-content">
+                        多位业务员回款率为0%，包括王鲁宁、赵平、张凯先等。建议立即跟进这些业务员的未回款合同，防范坏账风险。
+                    </div>
+                </div>
+                
+                <div class="insight-card">
+                    <div class="insight-title">
+                        <i class="fas fa-users" style="color: #fbbf24;"></i>
+                        团队培养建议
+                    </div>
+                    <div class="insight-content">
+                        建议建立"老带新"机制，让回款表现好的业务员（如沈力、申梦园）指导其他业务员，提升整体团队回款能力。
+                    </div>
+                </div>
+                
+                <div class="insight-card">
+                    <div class="insight-title">
+                        <i class="fas fa-target" style="color: #8b5cf6;"></i>
+                        业绩提升策略
+                    </div>
+                    <div class="insight-content">
+                        建议制定分层管理策略：刘松类重点提升回款，周陆成类扩大客户数量，葛茂峰类保持优势，实现全面均衡发展。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p>本报告由CRM统计分析系统自动生成 | 数据来源：SQL Server 2019 | 生成时间：2025年8月30日 02:03:58</p>
+        </footer>
+    </div>
+
+    <script>
+        // 月度趋势图表
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月'],
+                datasets: [
+                    {
+                        label: '刘松',
+                        data: [239740, 753965, 384203, 288980, 114070, 318150, 370350, 983405],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: '袁伟彬',
+                        data: [745110, 257357, 502304, 332890, 75853, 129580, 331897, 214298],
+                        borderColor: '#764ba2',
+                        backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: '葛茂峰',
+                        data: [227518, 127700, 94450, 122400, 17760, 309361, 401900, 290800],
+                        borderColor: '#f093fb',
+                        backgroundColor: 'rgba(240, 147, 251, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: '周陆成',
+                        data: [316750, 161414, 499131, 283406, 18600, 61066, 11461, 101500],
+                        borderColor: '#4ade80',
+                        backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: '沈力',
+                        data: [279500, 139858, 78189, 293407, 94180, 137732, 123308, 16400],
+                        borderColor: '#60a5fa',
+                        backgroundColor: 'rgba(96, 165, 250, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'TOP5业务员月度合同金额趋势（万元）',
+                        font: { size: 16, weight: 'bold' }
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '¥' + (value / 10000).toFixed(0) + '万';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 回款率对比图表
+        const recoveryCtx = document.getElementById('recoveryChart').getContext('2d');
+        new Chart(recoveryCtx, {
+            type: 'bar',
+            data: {
+                labels: ['陈慧', '苏园英', '于文武', '代玉洁', '吴长琦', '沈力', '申梦园', '李晓宇', '赵则林', '葛茂峰'],
+                datasets: [{
+                    label: '回款率(%)',
+                    data: [100, 77.63, 70.57, 75.01, 60.24, 50.24, 40.36, 43.08, 39.05, 31.51],
+                    backgroundColor: [
+                        'rgba(34, 197, 94, 0.8)',
+                        'rgba(34, 197, 94, 0.7)',
+                        'rgba(34, 197, 94, 0.6)',
+                        'rgba(34, 197, 94, 0.5)',
+                        'rgba(34, 197, 94, 0.4)',
+                        'rgba(34, 197, 94, 0.3)',
+                        'rgba(34, 197, 94, 0.2)',
+                        'rgba(34, 197, 94, 0.1)',
+                        'rgba(34, 197, 94, 0.08)',
+                        'rgba(34, 197, 94, 0.06)'
+                    ],
+                    borderColor: 'rgba(34, 197, 94, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '业务员回款率排行榜（TOP10）',
+                        font: { size: 16, weight: 'bold' }
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 数值动画
+        function animateCounters() {
+            const counters = document.querySelectorAll('.counter');
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target'));
+                const duration = 2000;
+                const step = target / (duration / 16);
+                let current = 0;
+
+                const timer = setInterval(() => {
+                    current += step;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    counter.textContent = Math.floor(current).toLocaleString();
+                }, 16);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            animateCounters();
+        });
+    </script>
+</body>
+</html>
