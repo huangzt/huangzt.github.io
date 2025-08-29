@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025年业绩目标达成率分析报告</title>
+
+    <!-- 外部资源 - 修复版本兼容性 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #f093fb;
+            --success-color: #4ade80;
+            --warning-color: #fbbf24;
+            --danger-color: #f87171;
+            --info-color: #60a5fa;
+            --dark-color: #1f2937;
+            --light-color: #f8fafc;
+            --border-color: #e2e8f0;
+            --shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            --gradient-accent: linear-gradient(135deg, var(--accent-color) 0%, var(--primary-color) 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .report-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--light-color);
+            border-radius: 20px;
+            box-shadow: var(--shadow-large);
+            margin-top: 20px;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .report-header {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--gradient-primary);
+            border-radius: 16px;
+            color: white;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .report-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+        }
+
+        .report-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .report-meta {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-large);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .kpi-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .kpi-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .kpi-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+        }
+
+        .kpi-change {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .change-positive {
+            color: var(--success-color);
+        }
+
+        .change-negative {
+            color: var(--danger-color);
+        }
+
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid var(--border-color);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+            background: #fafbfc;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+        }
+
+        .data-table th {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .data-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .insight-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .insight-card:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .insight-title {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .insight-content {
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #64748b;
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 40px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .report-container {
+                margin: 10px;
+                padding: 15px;
+                border-radius: 12px;
+            }
+
+            .report-title {
+                font-size: 1.8rem;
+            }
+
+            .report-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                height: 300px;
+                padding: 15px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .animate-slide-in {
+            animation: slideInLeft 0.6s ease-out;
+        }
+
+        /* 数值动画 */
+        .counter {
+            display: inline-block;
+        }
+
+        /* 加载状态 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <!-- 报告头部 -->
+        <header class="report-header">
+            <h1 class="report-title">2025年业绩目标达成率分析报告</h1>
+            <div class="report-meta">
+                <div class="meta-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>2025年1-8月</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-clock"></i>
+                    <span>数据截至2025-08-30</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-building"></i>
+                    <span>江苏泰斯特生态环保研究院有限公司</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- KPI指标卡片 -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-title">总合同金额</div>
+                    <div class="kpi-icon" style="background: var(--gradient-primary);">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">¥7,578,444</div>
+                <div class="kpi-change change-positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>2025年1-8月累计</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-title">活跃业务员</div>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">34</div>
+                <div class="kpi-change change-positive">
+                    <i class="fas fa-user-plus"></i>
+                    <span>本年内有业绩记录</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-title">月均业绩</div>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f472b6 100%);">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">¥947,306</div>
+                <div class="kpi-change change-positive">
+                    <i class="fas fa-trending-up"></i>
+                    <span>8个月平均值</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-title">最高业绩月份</div>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">8月</div>
+                <div class="kpi-change change-positive">
+                    <i class="fas fa-star"></i>
+                    <span>¥2,098,599 单月最高</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据分析图表 -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h2 class="section-title">月度业绩趋势分析</h2>
+            </div>
+            <div class="chart-container">
+                <canvas id="mainChart"></canvas>
+            </div>
+        </section>
+
+        <!-- 业务员业绩排行 -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h2 class="section-title">业务员业绩排行榜</h2>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>业务员</th>
+                        <th>合同金额</th>
+                        <th>占比</th>
+                        <th>月均业绩</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span style="color: #fbbf24; font-weight: bold;">1</span></td>
+                        <td>刘松</td>
+                        <td>¥3,091,212</td>
+                        <td>40.8%</td>
+                        <td>¥386,402</td>
+                    </tr>
+                    <tr>
+                        <td><span style="color: #c0c0c0; font-weight: bold;">2</span></td>
+                        <td>袁伟彬</td>
+                        <td>¥2,583,399</td>
+                        <td>34.1%</td>
+                        <td>¥322,925</td>
+                    </tr>
+                    <tr>
+                        <td><span style="color: #cd7f32; font-weight: bold;">3</span></td>
+                        <td>周陆成</td>
+                        <td>¥1,905,128</td>
+                        <td>25.1%</td>
+                        <td>¥238,141</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>葛茂峰</td>
+                        <td>¥1,630,089</td>
+                        <td>21.5%</td>
+                        <td>¥203,761</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>周磊</td>
+                        <td>¥701,924</td>
+                        <td>9.3%</td>
+                        <td>¥87,741</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>申梦园</td>
+                        <td>¥555,705</td>
+                        <td>7.3%</td>
+                        <td>¥69,463</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>沈力</td>
+                        <td>¥519,564</td>
+                        <td>6.9%</td>
+                        <td>¥64,946</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>卞军</td>
+                        <td>¥516,160</td>
+                        <td>6.8%</td>
+                        <td>¥64,520</td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>赵则林</td>
+                        <td>¥497,027</td>
+                        <td>6.6%</td>
+                        <td>¥62,128</td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>闫聪</td>
+                        <td>¥376,428</td>
+                        <td>5.0%</td>
+                        <td>¥47,054</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 分析洞察 -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <h2 class="section-title">分析洞察</h2>
+            </div>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-title">
+                        <i class="fas fa-user-tie"></i>
+                        核心业务员表现
+                    </div>
+                    <div class="insight-content">
+                        刘松、袁伟彬、周陆成三位业务员占据总业绩的75%以上，形成稳定的业绩铁三角。其中刘松个人贡献超过40%，表现最为突出。
+                    </div>
+                </div>
+
+                <div class="insight-card">
+                    <div class="insight-title">
+                        <i class="fas fa-calendar-alt"></i>
+                        月度增长趋势
+                    </div>
+                    <div class="insight-content">
+                        业绩呈现明显增长态势，8月份达到峰值¥2,098,599。下半年表现明显优于上半年，显示出团队战斗力的持续提升。
+                    </div>
+                </div>
+
+                <div class="insight-card">
+                    <div class="insight-title">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        业绩分布不均
+                    </div>
+                    <div class="insight-content">
+                        34名业务员中，前10名贡献超过85%的业绩，部分业务员月度业绩低于1万元，需要重点关注和培养。
+                    </div>
+                </div>
+
+                <div class="insight-card">
+                    <div class="insight-title">
+                        <i class="fas fa-target"></i>
+                        下半年冲刺
+                    </div>
+                    <div class="insight-content">
+                        7-8月份连续突破200万大关，显示出强劲的冲刺能力。建议制定Q4冲刺计划，有望超额完成年度目标。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p>本报告由CRM统计分析系统自动生成 | 数据来源：SQL Server 2019 | 生成时间：2025-08-30 02:16:57</p>
+        </footer>
+    </div>
+
+    <script>
+        // 图表配置
+        const chartConfig = {
+            type: 'line',
+            data: {
+                labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月'],
+                datasets: [{
+                    label: '月度合同金额',
+                    data: [2116858.57, 3897221.16, 2738896.15, 1843143.6, 1175288.92, 2903645.64, 2437970.81, 2098598.45],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#667eea',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '2025年1-8月月度业绩趋势',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        },
+                        color: '#1f2937'
+                    },
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        borderColor: '#667eea',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        displayColors: true,
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ¥' + context.parsed.y.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#64748b',
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            color: '#64748b',
+                            font: {
+                                size: 11
+                            },
+                            callback: function(value) {
+                                return '¥' + value.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                animation: {
+                    duration: 2000,
+                    easing: 'easeInOutQuart'
+                }
+            }
+        };
+
+        // 初始化图表
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof Chart !== 'undefined') {
+                const ctx = document.getElementById('mainChart');
+                if (ctx) {
+                    new Chart(ctx.getContext('2d'), chartConfig);
+                }
+            }
+
+            // 数值动画效果
+            animateCounters();
+        });
+
+        function animateCounters() {
+            const counters = document.querySelectorAll('.counter');
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target'));
+                if (target) {
+                    const duration = 2000;
+                    const step = target / (duration / 16);
+                    let current = 0;
+
+                    const timer = setInterval(() => {
+                        current += step;
+                        if (current >= target) {
+                            current = target;
+                            clearInterval(timer);
+                        }
+                        counter.textContent = Math.floor(current).toLocaleString();
+                    }, 16);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
