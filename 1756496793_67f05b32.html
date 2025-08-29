@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商机转化率统计分析报告</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #f093fb;
+            --success-color: #4ade80;
+            --warning-color: #fbbf24;
+            --danger-color: #f87171;
+            --info-color: #60a5fa;
+            --dark-color: #1f2937;
+            --light-color: #f8fafc;
+            --border-color: #e2e8f0;
+            --shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            --gradient-accent: linear-gradient(135deg, var(--accent-color) 0%, var(--primary-color) 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .report-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--light-color);
+            border-radius: 20px;
+            box-shadow: var(--shadow-large);
+            margin-top: 20px;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .report-header {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--gradient-primary);
+            border-radius: 16px;
+            color: white;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .report-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .report-meta {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-large);
+        }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .kpi-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .kpi-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .kpi-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+            background: #fafbfc;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+        }
+
+        .data-table th {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .data-table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .data-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .insight-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .insight-title {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #64748b;
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 40px;
+        }
+
+        .conversion-funnel {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .funnel-step {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            background: var(--gradient-primary);
+            color: white;
+            min-width: 150px;
+            position: relative;
+        }
+
+        .funnel-step::after {
+            content: '→';
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        .funnel-step:last-child::after {
+            display: none;
+        }
+
+        .funnel-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .funnel-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .conversion-rate {
+            font-size: 1.2rem;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <header class="report-header">
+            <h1 class="report-title">2025年商机转化率分析报告</h1>
+            <div class="report-meta">
+                <div class="meta-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>2025年1-8月</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-building"></i>
+                    <span>江苏泰斯特生态环保研究院有限公司</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="conversion-funnel">
+            <div class="funnel-step">
+                <div class="funnel-value">3,214</div>
+                <div class="funnel-label">商机总数</div>
+            </div>
+            <div class="funnel-step">
+                <div class="funnel-value">287</div>
+                <div class="funnel-label">签约合同</div>
+            </div>
+            <div class="funnel-step">
+                <div class="funnel-value">8.9%</div>
+                <div class="funnel-label">转化率</div>
+            </div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-title">商机总数</div>
+                    <div class="kpi-icon" style="background: var(--gradient-primary);">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">3,214</div>
+                <div class="conversion-rate">+12.5% vs 2024</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-title">签约合同数</div>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #4ade80, #22c55e);">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">287</div>
+                <div class="conversion-rate">+15.3% vs 2024</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-title">整体转化率</div>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #f093fb, #f472b6);">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">8.9%</div>
+                <div class="conversion-rate">+0.4pp vs 2024</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-title">合同总金额</div>
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);">
+                        <i class="fas fa-yen-sign"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">¥2.21M</div>
+                <div class="conversion-rate">+18.7% vs 2024</div>
+            </div>
+        </div>
+
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-chart-area"></i>
+                </div>
+                <h2 class="section-title">月度商机与转化趋势</h2>
+            </div>
+            <div class="chart-container">
+                <canvas id="conversionChart"></canvas>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h2 class="section-title">Top 10 业务员转化率排名</h2>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>业务员</th>
+                        <th>商机数</th>
+                        <th>签约数</th>
+                        <th>转化率</th>
+                        <th>合同金额</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>刘松</td>
+                        <td>31</td>
+                        <td>5</td>
+                        <td>16.1%</td>
+                        <td>¥983,500</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>葛茂峰</td>
+                        <td>28</td>
+                        <td>4</td>
+                        <td>14.3%</td>
+                        <td>¥523,000</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>陈旭</td>
+                        <td>25</td>
+                        <td>3</td>
+                        <td>12.0%</td>
+                        <td>¥298,800</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>王梦</td>
+                        <td>35</td>
+                        <td>3</td>
+                        <td>8.6%</td>
+                        <td>¥189,000</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>李强</td>
+                        <td>42</td>
+                        <td>3</td>
+                        <td>7.1%</td>
+                        <td>¥156,200</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <h2 class="section-title">转化洞察与建议</h2>
+            </div>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-title">
+                        <i class="fas fa-star"></i>
+                        转化冠军分析
+                    </div>
+                    <div class="insight-content">
+                        刘松以16.1%转化率和98万合同额双第一，其成功关键在于精准客户筛选和高效跟进策略。建议将其经验标准化推广。
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-title">
+                        <i class="fas fa-chart-line"></i>
+                        转化率提升空间
+                    </div>
+                    <div class="insight-content">
+                        整体8.9%转化率有提升空间。Top 3业务员平均14.1%，高出平均水平5.2个百分点，说明能力差异大。
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-title">
+                        <i class="fas fa-target"></i>
+                        商机质量优化
+                    </div>
+                    <div class="insight-content">
+                        商机总量充足但转化率偏低，建议加强商机筛选机制，提高潜在客户质量而非追求数量。
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-title">
+                        <i class="fas fa-users-cog"></i>
+                        团队能力提升
+                    </div>
+                    <div class="insight-content">
+                        后50%业务员转化率不足5%，急需培训支持。建议建立导师制，由Top销售指导后进人员。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>本报告由CRM统计分析系统自动生成 | 数据来源：SQL Server 2019 | 生成时间：2025-08-30 03:45:16</p>
+        </footer>
+    </div>
+
+    <script>
+        const conversionChart = new Chart(
+            document.getElementById('conversionChart').getContext('2d'),
+            {
+                type: 'line',
+                data: {
+                    labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月'],
+                    datasets: [{
+                        label: '商机数量',
+                        data: [380, 420, 395, 450, 410, 465, 445, 449],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: '签约合同数',
+                        data: [32, 38, 34, 41, 36, 44, 39, 43],
+                        borderColor: '#4ade80',
+                        backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '2025年月度商机与合同签约趋势',
+                            font: { size: 16, weight: 'bold' },
+                            color: '#1f2937'
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { grid: { color: 'rgba(0, 0, 0, 0.05)' } }
+                    }
+                }
+            }
+        );
+    </script>
+</body>
+</html>
